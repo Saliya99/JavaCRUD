@@ -4,6 +4,7 @@ package javacrud;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,10 +22,12 @@ public class productForm extends javax.swing.JFrame {
     public productForm() {
         initComponents();
         Connect();
+        LoadProductNo();
     }
     
     Connection con;
     PreparedStatement pst;
+    ResultSet rs;
     
     public void Connect(){
         try {
@@ -35,7 +38,21 @@ public class productForm extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }    
+    }
+    public void LoadProductNo(){
+        try {
+            pst = con.prepareStatement("SELECT ID FROM product_tbl");
+            rs = pst.executeQuery();
+            txtPid.removeAllItems();
+            while(rs.next()){
+                txtPid.addItem(rs.getString(1));
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }
     
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -89,8 +106,18 @@ public class productForm extends javax.swing.JFrame {
         });
 
         btnUpdate.setText("Update");
+        btnUpdate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateActionPerformed(evt);
+            }
+        });
 
         btnDelete.setText("Delete");
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
 
         btnNew.setText("New");
 
@@ -120,6 +147,11 @@ public class productForm extends javax.swing.JFrame {
         );
 
         btnSearch.setText("Search");
+        btnSearch.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSearchActionPerformed(evt);
+            }
+        });
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -249,6 +281,86 @@ public class productForm extends javax.swing.JFrame {
     private void btnAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAddMouseClicked
         // TODO add your handling code here:
     }//GEN-LAST:event_btnAddMouseClicked
+
+    private void btnSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSearchActionPerformed
+        try {
+            String pid= txtPid.getSelectedItem().toString();
+            
+            pst = con.prepareStatement("SELECT * FROM product_tbl WHERE ID=?");
+            pst.setString(1,pid);
+            rs = pst.executeQuery();
+            
+            if(rs.next()==true){
+                txtPname.setText(rs.getString(2));
+                txtPprice.setText(rs.getString(3));
+                txtPqty.setText(rs.getString(4));
+            }else{
+                JOptionPane.showMessageDialog(this,"Record not found");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }//GEN-LAST:event_btnSearchActionPerformed
+
+    private void btnUpdateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateActionPerformed
+        
+        try {
+            String pname = txtPname.getText();
+            String price = txtPprice.getText();
+            String qty = txtPqty.getText();
+            String pid= txtPid.getSelectedItem().toString();
+            
+            pst = con.prepareStatement("UPDATE product_tbl SET pname=?,pprice=?,QTY=? WHERE ID=?");
+            pst.setString(1, pname);
+            pst.setString(2, price);
+            pst.setString(3, qty);
+            pst.setString(4, pid);
+            
+            int k = pst.executeUpdate();
+            if(k==1){
+                JOptionPane.showMessageDialog(this,"Records had been successfully Updated !");
+                txtPname.setText("");
+                txtPprice.setText("");
+                txtPqty.setText("");
+                txtPname.requestFocus();
+                LoadProductNo();
+            }else{
+                JOptionPane.showMessageDialog(this,"Records Updating Failed !");
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }//GEN-LAST:event_btnUpdateActionPerformed
+
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        
+        try {
+            String pid= txtPid.getSelectedItem().toString();
+            pst = con.prepareStatement("DELETE FROM product_tbl WHERE ID=?");
+            pst.setString(1, pid);
+            
+            int k = pst.executeUpdate();
+            
+            if(k==1){
+                JOptionPane.showMessageDialog(this,"Records had been successfully Deleted !");
+                txtPname.setText("");
+                txtPprice.setText("");
+                txtPqty.setText("");
+                txtPname.requestFocus();
+                LoadProductNo();
+            }else{
+                JOptionPane.showMessageDialog(this,"Records Deleting Failed !");
+            }
+            
+             
+        } catch (SQLException ex) {
+            Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+    }//GEN-LAST:event_btnDeleteActionPerformed
 
     /**
      * @param args the command line arguments
