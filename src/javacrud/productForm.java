@@ -5,10 +5,13 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -23,6 +26,7 @@ public class productForm extends javax.swing.JFrame {
         initComponents();
         Connect();
         LoadProductNo();
+        Fetch();
     }
     
     Connection con;
@@ -51,6 +55,34 @@ public class productForm extends javax.swing.JFrame {
         } catch (SQLException ex) {
             Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
         }
+        
+    }
+    public void Fetch(){
+        try {
+            int q;
+            pst = con.prepareStatement("SELECT * FROM product_tbl");
+            rs=pst.executeQuery();
+            ResultSetMetaData rss = rs.getMetaData();
+            q=rss.getColumnCount();
+            
+            DefaultTableModel df = (DefaultTableModel)jTable1.getModel();
+            df.setRowCount(0);
+            while(rs.next()){
+                Vector v2 = new Vector();
+                for(int a=1; a<=q; a++){
+                    v2.add(rs.getString("ID"));
+                    v2.add(rs.getString("Pname"));
+                    v2.add(rs.getString("Pprice"));
+                    v2.add(rs.getString("QTY"));
+   
+                }
+                df.addRow(v2);
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         
     }
     
@@ -161,7 +193,7 @@ public class productForm extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Product ID", "Product Name", "Product Price", "Product Quantity"
             }
         ));
         jScrollPane1.setViewportView(jTable1);
@@ -268,6 +300,8 @@ public class productForm extends javax.swing.JFrame {
                 txtPname.setText("");
                 txtPprice.setText("");
                 txtPqty.setText("");
+                LoadProductNo();
+                Fetch();
             }else{
                 JOptionPane.showMessageDialog(this,"Record Failed to saved !");
             }
@@ -325,6 +359,7 @@ public class productForm extends javax.swing.JFrame {
                 txtPqty.setText("");
                 txtPname.requestFocus();
                 LoadProductNo();
+                Fetch();
             }else{
                 JOptionPane.showMessageDialog(this,"Records Updating Failed !");
             }
@@ -351,6 +386,7 @@ public class productForm extends javax.swing.JFrame {
                 txtPqty.setText("");
                 txtPname.requestFocus();
                 LoadProductNo();
+                Fetch();
             }else{
                 JOptionPane.showMessageDialog(this,"Records Deleting Failed !");
             }
