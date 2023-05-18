@@ -3,9 +3,11 @@ package javacrud;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -18,13 +20,15 @@ public class productForm extends javax.swing.JFrame {
      */
     public productForm() {
         initComponents();
+        Connect();
     }
     
     Connection con;
+    PreparedStatement pst;
     
     public void Connect(){
         try {
-            Class.forName("com.mysql.jdbc.Driver");
+            Class.forName("com.mysql.cj.jdbc.Driver");
             con = DriverManager.getConnection("jdbc:mysql://localhost/javacrud","root","");
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
@@ -214,7 +218,32 @@ public class productForm extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnAddActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddActionPerformed
-        // TODO add your handling code here:
+
+        try {
+            String pname = txtPname.getText();
+            String price = txtPprice.getText();
+            String qty = txtPqty.getText();
+            
+            pst = con.prepareStatement("INSERT INTO product_tbl (Pname,Pprice,QTY) VALUES (?,?,?)");
+            pst.setString(1, pname);
+            pst.setString(2, price);
+            pst.setString(3, qty);
+            
+            int k = pst.executeUpdate();
+            
+            if(k==1){
+                JOptionPane.showMessageDialog(this,"Record Added Successfully !");
+                txtPname.setText("");
+                txtPprice.setText("");
+                txtPqty.setText("");
+            }else{
+                JOptionPane.showMessageDialog(this,"Record Failed to saved !");
+            }
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(productForm.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
     }//GEN-LAST:event_btnAddActionPerformed
 
     private void btnAddMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnAddMouseClicked
